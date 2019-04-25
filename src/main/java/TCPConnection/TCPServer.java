@@ -110,8 +110,9 @@ public class TCPServer {
             }
             catch (IOException e1) {
                 // TODO Auto-generated catch block
-                e1.printStackTrace();
-                sendDataDB(e1.toString());
+                //e1.printStackTrace();
+                System.out.println("Socket Shutdown");
+                System.exit(0);
 
             }
         }
