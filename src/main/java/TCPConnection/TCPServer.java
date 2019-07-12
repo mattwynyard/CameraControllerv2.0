@@ -24,6 +24,8 @@ public class TCPServer {
         try {
             // create the main server socket
             server = new ServerSocket(38200, 0, InetAddress.getByName(null));
+
+            //server = new ServerSocket(38200, 0, InetAddress.getByName(null));
             mPhoneClient = client;
         } catch (IOException e) {
             System.out.println("Error: " + e);
@@ -101,8 +103,8 @@ public class TCPServer {
                         sendDataAndroid(line);
                     } else if (line.equals("Stop")) {
                         sendDataAndroid(line);
-                    } else {
-
+                    } else if (line.contains("Time")){
+                        sendDataAndroid(line);
                     }
                 }
                 in.close();

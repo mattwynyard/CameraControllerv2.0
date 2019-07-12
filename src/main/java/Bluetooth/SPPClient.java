@@ -306,7 +306,7 @@ public class SPPClient extends Thread {
                                     mPhotoOut.write(byteBuffer.toByteArray(), 21 + messageSize, photoSize);
                                     System.out.println("photoOut: "+ mPhotoOut.size());
                                     //photoName = message.substring(22, 43);
-                                    photoName = message.substring(26, 47); //handle millisecond
+                                    photoName = message.substring(29, 51); //handle millisecond
                                     CameraApp.setIcon(mPhotoOut.toByteArray(), photoName);
                                 }
                                 ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream();
@@ -320,7 +320,7 @@ public class SPPClient extends Thread {
                                     mPhotoOut.write(byteBuffer.toByteArray(), 21 + messageSize, photoSize);
                                     System.out.println("photoOut: "+ mPhotoOut.size());
                                     //photoName = message.substring(22, 43);
-                                    photoName = message.substring(26, 47); //handle millisecond
+                                    photoName = message.substring(26, 49); //handle millisecond
                                     CameraApp.setIcon(mPhotoOut.toByteArray(), photoName);
                                     byteBuffer.reset();
                                     mPhotoOut.reset();
