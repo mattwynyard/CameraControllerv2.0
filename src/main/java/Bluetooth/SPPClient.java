@@ -84,7 +84,6 @@ public class SPPClient extends Thread {
         } catch (NullPointerException e1) {
             e1.printStackTrace();
             mTCP.sendDataDB(e1.getMessage());
-            //System.exit(0);
         }
     }
 
@@ -129,7 +128,6 @@ public class SPPClient extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     private String decodeIntToString(byte[] buffer, int offset) {
@@ -154,17 +152,14 @@ public class SPPClient extends Thread {
             e.printStackTrace();
         }
         return value;
-
     }
 
     private String decodeString(byte[] buffer, int offset, int length) {
         String message = null;
         ByteArrayOutputStream temp = new ByteArrayOutputStream();
         temp.write(buffer, offset, length);
-        //String message = null;
         try {
             message = new String(temp.toByteArray(), "UTF-8");
-            //System.out.println("message: " + message);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -177,22 +172,17 @@ public class SPPClient extends Thread {
     }
 
     private void buildPhoto(int length, byte[] b) {
-
         mPhotoOut.write(b, 0, b.length);
         if (mPhotoOut.size() == length) {
             System.out.println("Building photo");
             byte photo[] = mPhotoOut.toByteArray();
             mPhotoOut.reset();
-            //CameraApp.setIcon(photo, photoName);
-            //writeLog(message, bytesReceived, totalBytes);
         } else {
             mPhotoOut.write(b, 0, b.length);
         }
     }
 
     private void sendMessage(byte[] buffer) {
-
-
         String recording = decodeString(buffer, 0, 1);
         String battery = decodeIntToString(buffer, 1);
         String error = decodeIntToString(buffer, 5);
@@ -202,7 +192,6 @@ public class SPPClient extends Thread {
         } else {
             mTCP.sendDataDB("NOTRECORDING,");
         }
-
         mTCP.sendDataDB("B:" + battery);
         mTCP.sendDataDB("E:" + error);
         mTCP.sendDataDB(message);
@@ -222,9 +211,6 @@ public class SPPClient extends Thread {
         } else {
             mMessageOut.write(b, metaBytes, b.length);
             System.out.println("Building message");
-//            System.out.println("length " + length);
-//            System.out.println("b length: " + b.length);
-//            System.out.println("mout size : " + b.length);
             size = mMessageOut.size();
             metaBytes += b.length;
             if (length == size) {
@@ -261,23 +247,15 @@ public class SPPClient extends Thread {
                 int photoSize = 0;
 
                 while ((len = in.read(buffer)) != -1) {
-                    //System.out.println("buffer length: " + len);
-
                     byteBuffer.write(buffer, 0, len); //read in total buffer from socket
-
                     if (metadata == true) {
                         payloadSize = decodeInteger(Arrays.copyOfRange(byteBuffer.toByteArray(), 0, 4), 0);
-                        //System.out.println("payload length: " + payloadSize);
                     }
                     metadata = false;
-                    //System.out.println("byte buffer length: " + byteBuffer.size());
 
                     if (byteBuffer.size() >= payloadSize) {
                         messageSize = decodeInteger(Arrays.copyOfRange(byteBuffer.toByteArray(), 4, 8), 0);
                         photoSize = decodeInteger(Arrays.copyOfRange(byteBuffer.toByteArray(), 8, 12), 0);
-                        //System.out.println("payload length: " + payloadSize);
-                        //System.out.println("message length: " + messageSize);
-                        //System.out.println("photo length: " + photoSize);
                         mMessageOut.write(byteBuffer.toByteArray(), 12, 1);
                         recording = new String(mMessageOut.toByteArray(), "UTF-8");
                         mMessageOut.reset();
@@ -306,7 +284,7 @@ public class SPPClient extends Thread {
                                     mPhotoOut.write(byteBuffer.toByteArray(), 21 + messageSize, photoSize);
                                     System.out.println("photoOut: "+ mPhotoOut.size());
                                     //photoName = message.substring(22, 43);
-                                    photoName = message.substring(29, 51); //handle millisecond
+                                    photoName = message.substring(26, 52); //handle millisecond
                                     CameraApp.setIcon(mPhotoOut.toByteArray(), photoName);
                                 }
                                 ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream();
@@ -320,7 +298,7 @@ public class SPPClient extends Thread {
                                     mPhotoOut.write(byteBuffer.toByteArray(), 21 + messageSize, photoSize);
                                     System.out.println("photoOut: "+ mPhotoOut.size());
                                     //photoName = message.substring(22, 43);
-                                    photoName = message.substring(26, 49); //handle millisecond
+                                    photoName = message.substring(26, 52); //handle millisecond
                                     CameraApp.setIcon(mPhotoOut.toByteArray(), photoName);
                                     byteBuffer.reset();
                                     mPhotoOut.reset();

@@ -24,8 +24,6 @@ public class TCPServer {
         try {
             // create the main server socket
             server = new ServerSocket(38200, 0, InetAddress.getByName(null));
-
-            //server = new ServerSocket(38200, 0, InetAddress.getByName(null));
             mPhoneClient = client;
         } catch (IOException e) {
             System.out.println("Error: " + e);
@@ -64,9 +62,7 @@ public class TCPServer {
     }
 
     public void sendDataAndroid(String message) {
-
         mPhoneClient.sendCommand(message);
-
     }
 
     /**
@@ -108,11 +104,8 @@ public class TCPServer {
                     }
                 }
                 in.close();
-
             }
             catch (IOException e1) {
-                // TODO Auto-generated catch block
-                //e1.printStackTrace();
                 System.out.println("Socket Shutdown");
                 System.exit(0);
 

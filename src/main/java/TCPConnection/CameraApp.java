@@ -53,14 +53,9 @@ public class CameraApp {
     public static void main(String[] args) {
 
         System.out.println(args[0]);
-
         mBluetooth = new BluetoothManager(args[0]);
         mBluetooth.start();
-
-
-
         Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
-
         while(true) {
             try {
                 Thread.sleep(100);
@@ -80,12 +75,7 @@ public class CameraApp {
         try {
             long start = System.currentTimeMillis();
             InputStream in = new ByteArrayInputStream(bytes);
-
             BufferedImage bufferedImage = ImageIO.read(in);
-            //System.out.println("Length:" + bytes.length);
-            //System.out.println("Width:" + bufferedImage.getWidth());
-            //System.out.println("File Saved: " + name);
-            
             File imageFile = new File("C:\\Road Inspection\\Thumbnails\\" + name + ".jpg");
             ImageIO.write(bufferedImage, "jpg", imageFile);
             in.close();
@@ -97,16 +87,4 @@ public class CameraApp {
         count++;
 
     }
-
-//    public static void setConnected(boolean state) {
-//        connected = state;
-//    }
-//
-//    public synchronized static void setStatus(String state) {
-//        status = state;
-//    }
-//
-//    public synchronized static void setRecording(boolean state) {
-//        recording = state;
-//    }
 }
