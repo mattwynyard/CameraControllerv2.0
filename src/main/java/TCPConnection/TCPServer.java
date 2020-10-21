@@ -34,15 +34,15 @@ public class TCPServer {
 
     public void start() {
 
-        System.out.println("Waiting for connection");
+
         try {
             // wait for a connection
             client = server.accept();
-            System.out.println("Connection, sending data.");
+            System.out.println("Succesful connection Access");
             writer = new PrintWriter(client.getOutputStream());
 
             mReadThread = new Thread(readFromClient);
-            mReadThread.setPriority(Thread.MAX_PRIORITY);
+            //mReadThread.setPriority(Thread.MAX_PRIORITY);
             mReadThread.start();
 
         } catch (IOException e) {
@@ -55,7 +55,7 @@ public class TCPServer {
      *
      * @param message - the message to be sent.
      */
-    public synchronized void sendDataDB(String message) {
+    public void sendDataDB(String message) {
         System.out.println(message);
         writer.print(message);
         writer.flush();

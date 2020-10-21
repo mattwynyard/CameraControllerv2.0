@@ -68,7 +68,7 @@ public class SPPClient extends Thread {
 
     public void run() {
         if (connected) {
-            System.out.println("Connection succesful...");
+            System.out.println("Connection to Android succesful...");
         }
         try {
             // Only one usage of each socket address (protocol/network address/port) is normally permitted.
