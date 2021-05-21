@@ -29,6 +29,7 @@ public class CameraApp {
     private static String status;
     private static BluetoothManager mBluetooth;
     private static int count = 0;
+    private static String path;
 
 
     private static Runnable ShutdownHook = new Runnable() {
@@ -52,7 +53,9 @@ public class CameraApp {
      */
     public static void main(String[] args) {
 
-        System.out.println(args[0]);
+        System.out.println("Connecting to:" + args[0]);
+        System.out.println("Thumbnails saved to:" + args[1]);
+        path = args[1];
         mBluetooth = new BluetoothManager(args[0]);
         mBluetooth.start();
         Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
@@ -76,7 +79,8 @@ public class CameraApp {
             long start = System.currentTimeMillis();
             InputStream in = new ByteArrayInputStream(bytes);
             BufferedImage bufferedImage = ImageIO.read(in);
-            File imageFile = new File("C:\\Road Inspection\\Thumbnails\\" + name + ".jpg");
+            File imageFile = new File(path + name + ".jpg");
+            //imageFile = new File("C:\\Road Inspection\\Thumbnails\\" + name + ".jpg");
             ImageIO.write(bufferedImage, "jpg", imageFile);
             in.close();
             long end = System.currentTimeMillis();

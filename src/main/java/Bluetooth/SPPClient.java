@@ -171,16 +171,16 @@ public class SPPClient extends Thread {
         return message;
     }
 
-    private void buildPhoto(int length, byte[] b) {
-        mPhotoOut.write(b, 0, b.length);
-        if (mPhotoOut.size() == length) {
-            System.out.println("Building photo");
-            byte photo[] = mPhotoOut.toByteArray();
-            mPhotoOut.reset();
-        } else {
-            mPhotoOut.write(b, 0, b.length);
-        }
-    }
+//    private void buildPhoto(int length, byte[] b) {
+//        mPhotoOut.write(b, 0, b.length);
+//        if (mPhotoOut.size() == length) {
+//            System.out.println("Building photo");
+//            byte photo[] = mPhotoOut.toByteArray();
+//            mPhotoOut.reset();
+//        } else {
+//            mPhotoOut.write(b, 0, b.length);
+//        }
+//    }
 
     private void sendMessage(byte[] buffer) {
         String recording = decodeString(buffer, 0, 1);
@@ -199,31 +199,31 @@ public class SPPClient extends Thread {
 
     }
 
-    private void buildMessage(int length, byte[] b) {
-        int size = mMessageOut.size();
-        System.out.println("mout size : " + b.length);
-        if (length == size) {
-            sendMessage(mMessageOut.toByteArray());
-            mMessageOut.reset();
-            metaBytes = 0;
-            photodata = true;
-            metadata = false;
-        } else {
-            mMessageOut.write(b, metaBytes, b.length);
-            System.out.println("Building message");
-            size = mMessageOut.size();
-            metaBytes += b.length;
-            if (length == size) {
-                //send data
-                System.out.println("sending message..");
-                sendMessage(mMessageOut.toByteArray());
-                mMessageOut.reset();
-                metaBytes = 0;
-                photodata = true;
-                metadata = false;
-            }
-        }
-    }
+//    private void buildMessage(int length, byte[] b) {
+//        int size = mMessageOut.size();
+//        System.out.println("mout size : " + b.length);
+//        if (length == size) {
+//            sendMessage(mMessageOut.toByteArray());
+//            mMessageOut.reset();
+//            metaBytes = 0;
+//            photodata = true;
+//            metadata = false;
+//        } else {
+//            mMessageOut.write(b, metaBytes, b.length);
+//            System.out.println("Building message");
+//            size = mMessageOut.size();
+//            metaBytes += b.length;
+//            if (length == size) {
+//                //send data
+//                System.out.println("sending message..");
+//                sendMessage(mMessageOut.toByteArray());
+//                mMessageOut.reset();
+//                metaBytes = 0;
+//                photodata = true;
+//                metadata = false;
+//            }
+//        }
+//    }
 
     private Runnable readFromServer = new Runnable() {
         @Override
