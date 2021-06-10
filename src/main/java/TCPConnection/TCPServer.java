@@ -33,8 +33,6 @@ public class TCPServer {
     }
 
     public void start() {
-
-
         try {
             // wait for a connection
             client = server.accept();
@@ -42,7 +40,7 @@ public class TCPServer {
             writer = new PrintWriter(client.getOutputStream());
 
             mReadThread = new Thread(readFromClient);
-            //mReadThread.setPriority(Thread.MAX_PRIORITY);
+            mReadThread.setPriority(Thread.MAX_PRIORITY);
             mReadThread.start();
 
         } catch (IOException e) {
