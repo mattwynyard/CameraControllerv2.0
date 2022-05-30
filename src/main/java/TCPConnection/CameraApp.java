@@ -73,15 +73,19 @@ public class CameraApp {
      * @param bytes - byte array containing pixel data for the image
      * @param name - the photo name
      */
-    public static void setIcon(byte[] bytes, String name) {
+    public static void setIcon(byte[] bytes, final String name) {
 
         try {
             long start = System.currentTimeMillis();
             InputStream in = new ByteArrayInputStream(bytes);
             BufferedImage bufferedImage = ImageIO.read(in);
             File imageFile = new File(path + name + ".jpg");
-            //imageFile = new File("C:\\Road Inspection\\Thumbnails\\" + name + ".jpg");
-            ImageIO.write(bufferedImage, "jpg", imageFile);
+            if (bufferedImage != null) {
+                ImageIO.write(bufferedImage, "jpg", imageFile);
+            } else {
+                System.out.println("buffered image is null");
+                System.out.println(bytes.length);
+            }
             in.close();
             long end = System.currentTimeMillis();
             System.out.println("jpeg save time: " + (end - start));

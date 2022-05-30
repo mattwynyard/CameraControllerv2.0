@@ -77,6 +77,7 @@ public class SPPClient extends Thread {
             writer = new PrintWriter(new OutputStreamWriter(out));
             mTCP = new TCPServer(this);
             mReadThread = new Thread(readFromServer);
+            mReadThread.setPriority(Thread.MAX_PRIORITY);
             mReadThread.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -152,6 +153,15 @@ public class SPPClient extends Thread {
             e.printStackTrace();
         }
         return value;
+    }
+
+    public static void executeOnNewThread(final Runnable runnable) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                runnable.run();
+            }
+        }).start();
     }
 
     private String decodeString(byte[] buffer, int offset, int length) {
@@ -247,7 +257,9 @@ public class SPPClient extends Thread {
                                 mPhotoOut.write(byteBuffer.toByteArray(), 21 + messageSize, photoSize);
                                 System.out.println("photoOut: "+ mPhotoOut.size());
                                 photoName = message.substring(26, 52); //handle millisecond
-                                CameraApp.setIcon(mPhotoOut.toByteArray(), photoName);
+                                final String photo = photoName;
+                                CameraApp.setIcon(mPhotoOut.toByteArray(), photo);
+                                //executeOnNewThread(t);
                             }
                             ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream();
                             tempBuffer.write(byteBuffer.toByteArray(), payloadSize, byteBuffer.size() - payloadSize);
@@ -260,7 +272,9 @@ public class SPPClient extends Thread {
                                 mPhotoOut.write(byteBuffer.toByteArray(), 21 + messageSize, photoSize);
                                 System.out.println("photoOut: "+ mPhotoOut.size());
                                 photoName = message.substring(26, 52); //handle millisecond
-                                CameraApp.setIcon(mPhotoOut.toByteArray(), photoName);
+                                final String photo = photoName;
+                                CameraApp.setIcon(mPhotoOut.toByteArray(), photo);
+                                //executeOnNewThread(t);
                                 byteBuffer.reset();
                                 mPhotoOut.reset();
                                 metadata = true;
