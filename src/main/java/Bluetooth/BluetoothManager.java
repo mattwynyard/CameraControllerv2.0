@@ -25,7 +25,7 @@ public class BluetoothManager implements DiscoveryListener {
 	private LocalDevice mLocalDevice;
 	private RemoteDevice mRemoteDevice;
 	private DiscoveryAgent mAgent;
-	private String camera;
+	private String inspector;
 	final Object lock = new Object();
 	final Object enquiryLock = new Object();
 	final Object searchLock = new Object();
@@ -33,35 +33,17 @@ public class BluetoothManager implements DiscoveryListener {
 	private Vector<RemoteDevice> mDevices = new Vector();
 	private String connectionURL = null;
 	public SPPClient mClient;
-
 	private long start;
 	private long stop;
 
-	/**
-	 * Class constructor for Bluetooth manager
-	 */
-	public BluetoothManager(String camera) {
-		
+	public BluetoothManager(String inspector) {
 		try {	
 			this.mLocalDevice = LocalDevice.getLocalDevice();
 			mDevices.clear();
-			this.camera = camera;
+			this.inspector = inspector;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * Sends message 'Start' to Android phone
-	 */
-	public void sendStartCommand() {
-		mClient.sendCommand("Start");
-	}
-	/**
-	 * Sends message 'Stop' to Android phone
-	 */
-	public void sendStopCommand() {
-		mClient.sendCommand("Stop");
 	}
 
 	/**
@@ -93,9 +75,7 @@ public class BluetoothManager implements DiscoveryListener {
 			System.out.println("No Devices Found.");
 			mAgent.cancelInquiry(this);
 		} else {
-			//print bluetooth device addresses and names in the format [ No. address (name) ]
             System.out.println("Device count: " + deviceCount);
-			//System.out.println("Bluetooth Devices: ");
 			for (int i = 0; i < deviceCount; i++) {
 				mRemoteDevice = mDevices.elementAt(i);
 				try {
@@ -145,19 +125,17 @@ public class BluetoothManager implements DiscoveryListener {
 	 */
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
 
-		//System.out.println("Device discovered: " + btDevice.getBluetoothAddress());
         try {
             System.out.println("Device discovered: " + btDevice.getFriendlyName(false));
         } catch (IOException e) {
             e.printStackTrace();
         }
 		try {
-			if (btDevice.getFriendlyName(false).equals("OnSite_BLT_Adapter_" + camera)) {
+			if (btDevice.getFriendlyName(false).equals("OnSite_BLT_Adapter_" + inspector)) {
                 System.out.println("Trusted: " + btDevice.isTrustedDevice());
                 System.out.println("Authenticated: " + btDevice.isAuthenticated());
 				mAgent.cancelInquiry(this);
                 connect(btDevice, mAgent, this);
-
                 mDevices.addElement(btDevice);
             }
 		} catch (IOException e) {
@@ -253,5 +231,4 @@ public class BluetoothManager implements DiscoveryListener {
 			break;
 		}
 	}//end method
-
 } //end class

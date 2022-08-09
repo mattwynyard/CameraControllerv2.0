@@ -36,7 +36,7 @@ public class TCPServer {
         try {
             // wait for a connection
             client = server.accept();
-            System.out.println("Succesful connection Access");
+            System.out.println("Client connected: " + client.toString());
             writer = new PrintWriter(client.getOutputStream());
 
             mReadThread = new Thread(readFromClient);
@@ -83,7 +83,6 @@ public class TCPServer {
      * from the client - access
      */
     private Runnable readFromClient = new Runnable() {
-
         @Override
         public void run() {
             System.out.println("Read Thread listening");
@@ -99,6 +98,8 @@ public class TCPServer {
                         sendDataAndroid(line);
                     } else if (line.contains("Time")){
                         sendDataAndroid(line);
+                    } else {
+                        System.out.println(line);
                     }
                 }
                 in.close();
@@ -106,7 +107,6 @@ public class TCPServer {
             catch (IOException e1) {
                 System.out.println("Socket Shutdown");
                 System.exit(0);
-
             }
         }
     };

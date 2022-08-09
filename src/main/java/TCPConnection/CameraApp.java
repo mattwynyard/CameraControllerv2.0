@@ -14,12 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import Bluetooth.BluetoothManager;
-
-
 /**
  * Main application class for CameraApp
  * Intialiases bluetooth adapter with camera id and handles the image build.
- *
  *
  */
 public class CameraApp {
@@ -30,7 +27,6 @@ public class CameraApp {
     private static BluetoothManager mBluetooth;
     private static int count = 0;
     private static String path;
-
 
     private static Runnable ShutdownHook = new Runnable() {
         @Override
@@ -43,7 +39,6 @@ public class CameraApp {
                 mBluetooth.mClient.closeAll();
             }
         }
-
     };
 
     /**
@@ -53,7 +48,7 @@ public class CameraApp {
      */
     public static void main(String[] args) {
 
-        System.out.println("Connecting to:" + args[0]);
+        System.out.println("Inspector:" + args[0]);
         System.out.println("Thumbnails saved to:" + args[1]);
         path = args[1];
         mBluetooth = new BluetoothManager(args[0]);
@@ -74,7 +69,6 @@ public class CameraApp {
      * @param name - the photo name
      */
     public static void setIcon(byte[] bytes, final String name) {
-
         try {
             long start = System.currentTimeMillis();
             InputStream in = new ByteArrayInputStream(bytes);
