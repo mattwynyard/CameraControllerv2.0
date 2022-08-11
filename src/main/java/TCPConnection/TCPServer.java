@@ -12,13 +12,16 @@ import com.sun.net.httpserver.HttpServer;
 
 public class TCPServer {
 
-    private InputStream in;
+    private InputStream accessReader;
+    private PrintWriter accessWriter; //writes to DB
+    private InputStream mapReader;
+    private PrintWriter mapWriter; //writes to DB
     private ServerSocket server;
     private List<Socket> clients;
-    private Thread mReadThread;
-    private PrintWriter writer; //writes to DB
+    private Thread mReadAccessThread;
+    private Thread mReadMapThread;
     private SPPClient mPhoneClient;
-    private boolean phone = false;
+    private boolean phone;
 
     public TCPServer(int port, boolean phone) {
         try {
@@ -29,38 +32,46 @@ public class TCPServer {
             System.out.println("Error: " + e);
             return;
         }
-        start();
+        if (phone) start();
     }
 
+    //called from SPPClient before thread start
     public void setBluetoothClient(SPPClient client) {
         mPhoneClient = client;
     }
 
     public void start() {
         try {
-            // wait for a connection
-
-            while (true) {
                 Socket client = server.accept();
-                writer = new PrintWriter(client.getOutputStream()); //access
                 System.out.println("Client connected: " + client.toString());
                 System.out.println("Local Address: " + client.getLocalAddress());
                 System.out.println("Remote Address: " + client.getRemoteSocketAddress());
-                System.out.println("Clients connected: " + clients.size());
                 clients.add(client);
-                if (clients.size() == 1){
-                    mReadThread = new Thread(readFromAccess);
-                    mReadThread.setPriority(Thread.MAX_PRIORITY);
-                    mReadThread.start();
-                } else {
-
-                }
-
-
-           }
+                System.out.println("Clients connected: " + clients.size());
+                accessWriter = new PrintWriter(client.getOutputStream()); //access
+                mReadAccessThread = new Thread(readFromAccess);
+                mReadAccessThread.setPriority(Thread.MAX_PRIORITY);
+                mReadAccessThread.start();
         } catch (IOException e) {
             System.out.println("Error: " + e);
-            sendDataDB(e.toString());
+        }
+    }
+
+    public void startMap() {
+        try {
+            System.out.println("Opening map port");
+            Socket client = server.accept();
+            System.out.println("Client connected: " + client.toString());
+            System.out.println("Local Address: " + client.getLocalAddress());
+            System.out.println("Remote Address: " + client.getRemoteSocketAddress());
+            clients.add(client);
+            System.out.println("Clients connected: " + clients.size());
+            mapWriter = new PrintWriter(client.getOutputStream()); //access
+            mReadMapThread = new Thread(readFromMap);
+            mReadMapThread.setPriority(Thread.MAX_PRIORITY);
+            mReadMapThread.start();
+        } catch (IOException e) {
+            System.out.println("Error: " + e);
         }
     }
 
@@ -70,8 +81,14 @@ public class TCPServer {
      */
     public void sendDataDB(String message) {
         System.out.println(message);
-        writer.print(message);
-        writer.flush();
+        accessWriter.print(message);
+        accessWriter.flush();
+    }
+
+    public void sendDataDBfromMap(String message) {
+        System.out.println(message);
+        mapWriter.print(message);
+        mapWriter.flush();
     }
 
     public void sendDataAndroid(String message) {
@@ -83,14 +100,17 @@ public class TCPServer {
      */
     public void closeAll() {
         try {
-            writer.close();
-            in.close();
+            accessWriter.close();
+            accessReader.close();
+            mapWriter.close();
+            mapReader.close();
             server.close();
             for (Socket client: clients) {
                 client.close();
             }
-            writer = null;
-            mReadThread = null;
+            accessWriter = null;
+            mReadAccessThread = null;
+            mReadMapThread = null;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -106,8 +126,8 @@ public class TCPServer {
             int length;
             byte[] buffer = new byte[1024];
             try {
-                in = clients.get(0).getInputStream();
-                while ((length = in.read(buffer)) != -1) {
+                accessReader = clients.get(0).getInputStream();
+                while ((length = accessReader.read(buffer)) != -1) {
                     String line = new String(buffer, 0, length);
                     if (line.equals("Start")) {
                         sendDataAndroid(line);
@@ -119,7 +139,7 @@ public class TCPServer {
                         System.out.println(line);
                     }
                 }
-                in.close();
+                accessReader.close();
             }
             catch (IOException e1) {
                 System.out.println("Socket Shutdown");
@@ -135,12 +155,13 @@ public class TCPServer {
             int length;
             byte[] buffer = new byte[1024];
             try {
-                in = clients.get(1).getInputStream();
-                while ((length = in.read(buffer)) != -1) {
+                mapReader = clients.get(1).getInputStream();
+                while ((length = mapReader.read(buffer)) != -1) {
                     String line = new String(buffer, 0, length);
                     System.out.println(line);
+                    sendDataDBfromMap((line));
                 }
-                in.close();
+                mapReader.close();
             }
             catch (IOException e1) {
                 System.out.println("Socket Shutdown");

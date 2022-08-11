@@ -55,9 +55,11 @@ public class CameraApp {
             System.out.println("Initialising bluetooth connection...\n");
             mBluetooth = new BluetoothManager(args[1], mServer);
             mBluetooth.start();
+            mServer.startMap();
         } else {
             System.out.println("Starting server...\n");
-            //mServer = new TCPServer();
+            mServer = new TCPServer(38200, false);
+            mServer.startMap();
         }
         Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
         while(true) {
@@ -94,6 +96,5 @@ public class CameraApp {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //count++;
     }
 }

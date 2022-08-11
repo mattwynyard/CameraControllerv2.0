@@ -29,10 +29,7 @@ public class SPPClient extends Thread {
     private Thread mReadThread;
     private ByteArrayOutputStream mMessageOut;
     private ByteArrayOutputStream mPhotoOut;
-    private FileWriter fw;
-    private BufferedWriter bw;
     private int messageSize = 0;
-
 
     public SPPClient(String connectionURL, TCPServer server) {
         this.connectionURL = connectionURL;
@@ -228,7 +225,6 @@ public class SPPClient extends Thread {
                                 photoName = message.substring(26, 52); //handle millisecond
                                 final String photo = photoName;
                                 CameraApp.setIcon(mPhotoOut.toByteArray(), photo);
-                                //executeOnNewThread(t);
                             }
                             ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream();
                             tempBuffer.write(byteBuffer.toByteArray(), payloadSize, byteBuffer.size() - payloadSize);
@@ -243,7 +239,6 @@ public class SPPClient extends Thread {
                                 photoName = message.substring(26, 52); //handle millisecond
                                 final String photo = photoName;
                                 CameraApp.setIcon(mPhotoOut.toByteArray(), photo);
-                                //executeOnNewThread(t);
                                 byteBuffer.reset();
                                 mPhotoOut.reset();
                                 metadata = true;
