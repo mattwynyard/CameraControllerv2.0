@@ -6,7 +6,7 @@
 
 package Bluetooth;
 
-import TCPConnection.CameraApp;
+import TCPConnection.TCPServer;
 
 import javax.bluetooth.BluetoothStateException;
 import javax.bluetooth.DeviceClass;
@@ -25,7 +25,7 @@ public class BluetoothManager implements DiscoveryListener {
 	private LocalDevice mLocalDevice;
 	private RemoteDevice mRemoteDevice;
 	private DiscoveryAgent mAgent;
-	private String inspector;
+	private String id;
 	final Object lock = new Object();
 	final Object enquiryLock = new Object();
 	final Object searchLock = new Object();
@@ -33,14 +33,16 @@ public class BluetoothManager implements DiscoveryListener {
 	private Vector<RemoteDevice> mDevices = new Vector();
 	private String connectionURL = null;
 	public SPPClient mClient;
+	public TCPServer mServer;
 	private long start;
 	private long stop;
 
-	public BluetoothManager(String inspector) {
+	public BluetoothManager(String id, TCPServer server) {
 		try {	
 			this.mLocalDevice = LocalDevice.getLocalDevice();
 			mDevices.clear();
-			this.inspector = inspector;
+			this.id = id;
+			this.mServer = server;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -51,7 +53,6 @@ public class BluetoothManager implements DiscoveryListener {
 	 * Device discovery and connection is handled by the bluecove callbacks.
 	 */
 	public void start() {
-
 		System.out.println("Local Bluetooth Address: " + mLocalDevice.getBluetoothAddress());
 		System.out.println("Local Computer Name: " + mLocalDevice.getFriendlyName());
         start = System.currentTimeMillis();
@@ -94,7 +95,6 @@ public class BluetoothManager implements DiscoveryListener {
 	 * @param client - this
 	 */
 	public void connect(RemoteDevice remoteDevice, DiscoveryAgent agent, BluetoothManager client) {
-		
 		UUID[] uuidSet = new UUID[1];
         uuidSet[0]=new UUID("0003000000001000800000805F9B34FB", false);
         int[] attrIds = { 0x0003 }; //RFCOMM
@@ -124,14 +124,13 @@ public class BluetoothManager implements DiscoveryListener {
 	 * 
 	 */
 	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-
         try {
             System.out.println("Device discovered: " + btDevice.getFriendlyName(false));
         } catch (IOException e) {
             e.printStackTrace();
         }
 		try {
-			if (btDevice.getFriendlyName(false).equals("OnSite_BLT_Adapter_" + inspector)) {
+			if (btDevice.getFriendlyName(false).equals("OnSite_BLT_Adapter_" + id)) {
                 System.out.println("Trusted: " + btDevice.isTrustedDevice());
                 System.out.println("Authenticated: " + btDevice.isAuthenticated());
 				mAgent.cancelInquiry(this);
@@ -140,9 +139,7 @@ public class BluetoothManager implements DiscoveryListener {
             }
 		} catch (IOException e) {
 			e.printStackTrace();
-			mClient.mTCP.sendDataDB(e.toString());
 		}
-		return;
 	}
 	
 	/**
@@ -160,11 +157,13 @@ public class BluetoothManager implements DiscoveryListener {
 			//URL needed for connection to android bluetooth server
 			mAgent.cancelServiceSearch(transID);
 			//Creates client running on new thread on specified url
-			mClient = new SPPClient(connectionURL);
-			if (mClient != null) {
+			mClient = new SPPClient(connectionURL, mServer);
+			if (mClient.isConnected()) {
 				stop = System.currentTimeMillis();
 				System.out.println("Device discovery: " + ((stop - start)/ 1000) + " s");
 				mClient.start();
+			} else {
+				System.out.println("Client failed to connect");
 			}
 		}
 

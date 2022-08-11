@@ -29,18 +29,14 @@ public class SPPClient extends Thread {
     private Thread mReadThread;
     private ByteArrayOutputStream mMessageOut;
     private ByteArrayOutputStream mPhotoOut;
-    private int metaBytes;
     private FileWriter fw;
     private BufferedWriter bw;
-
-    private boolean metadata = false; //receiving photo metadata
-    private boolean photodata = false; //receiving photo metadata
-    private int headerSize = 0;
     private int messageSize = 0;
 
 
-    public SPPClient(String connectionURL) {
+    public SPPClient(String connectionURL, TCPServer server) {
         this.connectionURL = connectionURL;
+        this.mTCP = server;
         try {
             mStreamConnection = (StreamConnection) Connector.open(connectionURL);
             if (mStreamConnection != null) {
@@ -51,19 +47,8 @@ public class SPPClient extends Thread {
         }
     }
 
-    /**
-     * Sends command to Android phone via bluetooth connection
-     *
-     * @param command - the command to send
-     */
-    public void sendCommand(String command) {
-        writer.println(command);
-        writer.flush();
-        try {
-            Thread.sleep(200);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public boolean isConnected() {
+        return connected;
     }
 
     public void run() {
@@ -71,20 +56,18 @@ public class SPPClient extends Thread {
             System.out.println("Connection to Android succesful...");
         }
         try {
-            // Only one usage of each socket address (protocol/network address/port) is normally permitted.
-            //can cause null pointer exception in Thread-2 if instance of app already running
             out = mStreamConnection.openOutputStream();
             writer = new PrintWriter(new OutputStreamWriter(out));
-            mTCP = new TCPServer(this);
-            mReadThread = new Thread(readFromServer);
+            mTCP.setBluetoothClient(this);
+            mReadThread = new Thread(readFromAndroid);
             mReadThread.setPriority(Thread.MAX_PRIORITY);
             mReadThread.start();
         } catch (IOException e) {
             e.printStackTrace();
-            mTCP.sendDataDB(e.getMessage());
         } catch (NullPointerException e1) {
             e1.printStackTrace();
-            mTCP.sendDataDB(e1.getMessage());
+        } catch (Exception e2) {
+            e2.printStackTrace();
         }
     }
 
@@ -106,29 +89,6 @@ public class SPPClient extends Thread {
 
     public byte[] clearBuffer() {
         return new byte[1024];
-    }
-
-    private void writeLog(String message, int bytesReceived, int totalBytes) {
-
-        try {
-            fw = new FileWriter("C:\\Road Inspection\\Log\\Log.txt", true);
-            bw = new BufferedWriter(fw);
-            bw.write(message + "|" + Integer.toString(bytesReceived) + "|" + Integer.toString(totalBytes));
-            bw.newLine();
-            bw.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void writeLog(Exception error) {
-        try {
-            fw = new FileWriter("C:\\Road Inspection\\Log\\Log.txt", true);
-            bw = new BufferedWriter(fw);
-            bw.write(error.getMessage() + "|" + error.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private String decodeIntToString(byte[] buffer, int offset) {
@@ -181,6 +141,16 @@ public class SPPClient extends Thread {
         return message;
     }
 
+    /**
+     * Sends command to Android phone via bluetooth connection
+     *
+     * @param command - the command to send
+     */
+    public void sendCommand(String command) {
+        writer.println(command);
+        writer.flush();
+    }
+
     private void sendMessage(byte[] buffer) {
         String recording = decodeString(buffer, 0, 1);
         String battery = decodeIntToString(buffer, 1);
@@ -195,13 +165,12 @@ public class SPPClient extends Thread {
         mTCP.sendDataDB("E:" + error);
         mTCP.sendDataDB(message);
         mMessageOut.reset();
-
     }
 
-    private Runnable readFromServer = new Runnable() {
+    private Runnable readFromAndroid = new Runnable() {
         @Override
         public void run() {
-        System.out.println("Reading From Server");
+        System.out.println("Reading From Android");
         try {
             in = mStreamConnection.openInputStream();
             byte[] buffer = new byte[1024];
@@ -324,6 +293,28 @@ public class SPPClient extends Thread {
         }
         }
     };
+
+    //    private void writeLog(String message, int bytesReceived, int totalBytes) {
+    //        try {
+    //            fw = new FileWriter("C:\\Road Inspection\\Log\\Log.txt", true);
+    //            bw = new BufferedWriter(fw);
+    //            bw.write(message + "|" + Integer.toString(bytesReceived) + "|" + Integer.toString(totalBytes));
+    //            bw.newLine();
+    //            bw.flush();
+    //        } catch (IOException e) {
+    //            e.printStackTrace();
+    //        }
+    //    }
+    //
+    //    private void writeLog(Exception error) {
+    //        try {
+    //            fw = new FileWriter("C:\\Road Inspection\\Log\\Log.txt", true);
+    //            bw = new BufferedWriter(fw);
+    //            bw.write(error.getMessage() + "|" + error.toString());
+    //        } catch (IOException e) {
+    //            e.printStackTrace();
+    //        }
+    //    }
 }
 
 

@@ -2,6 +2,8 @@ package TCPConnection;
 
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import Bluetooth.SPPClient;
 import com.sun.net.httpserver.HttpExchange;
@@ -12,19 +14,17 @@ public class TCPServer {
 
     private InputStream in;
     private ServerSocket server;
-    private Socket client;
+    private List<Socket> clients;
     private Thread mReadThread;
     private PrintWriter writer; //writes to DB
     private SPPClient mPhoneClient;
+    private boolean phone = false;
 
-    /**
-     * TCPServer constructor which creates a new server socket on local host port 38200 then calls start() method
-     */
-    public TCPServer(SPPClient client) {
+    public TCPServer(int port, boolean phone) {
         try {
-            // create the main server socket
-            server = new ServerSocket(38200, 0, InetAddress.getByName(null));
-            mPhoneClient = client;
+            server = new ServerSocket(port, 0, InetAddress.getByName(null));
+            clients = new ArrayList<Socket>();
+            this.phone = phone;
         } catch (IOException e) {
             System.out.println("Error: " + e);
             return;
@@ -32,17 +32,32 @@ public class TCPServer {
         start();
     }
 
+    public void setBluetoothClient(SPPClient client) {
+        mPhoneClient = client;
+    }
+
     public void start() {
         try {
             // wait for a connection
-            client = server.accept();
-            System.out.println("Client connected: " + client.toString());
-            writer = new PrintWriter(client.getOutputStream());
 
-            mReadThread = new Thread(readFromClient);
-            mReadThread.setPriority(Thread.MAX_PRIORITY);
-            mReadThread.start();
+            while (true) {
+                Socket client = server.accept();
+                writer = new PrintWriter(client.getOutputStream()); //access
+                System.out.println("Client connected: " + client.toString());
+                System.out.println("Local Address: " + client.getLocalAddress());
+                System.out.println("Remote Address: " + client.getRemoteSocketAddress());
+                System.out.println("Clients connected: " + clients.size());
+                clients.add(client);
+                if (clients.size() == 1){
+                    mReadThread = new Thread(readFromAccess);
+                    mReadThread.setPriority(Thread.MAX_PRIORITY);
+                    mReadThread.start();
+                } else {
 
+                }
+
+
+           }
         } catch (IOException e) {
             System.out.println("Error: " + e);
             sendDataDB(e.toString());
@@ -71,7 +86,9 @@ public class TCPServer {
             writer.close();
             in.close();
             server.close();
-            client.close();
+            for (Socket client: clients) {
+                client.close();
+            }
             writer = null;
             mReadThread = null;
         } catch (IOException e) {
@@ -82,14 +99,14 @@ public class TCPServer {
      * To run in the background,  reads incoming data
      * from the client - access
      */
-    private Runnable readFromClient = new Runnable() {
+    private Runnable readFromAccess = new Runnable() {
         @Override
         public void run() {
             System.out.println("Read Thread listening");
             int length;
             byte[] buffer = new byte[1024];
             try {
-                in = client.getInputStream();
+                in = clients.get(0).getInputStream();
                 while ((length = in.read(buffer)) != -1) {
                     String line = new String(buffer, 0, length);
                     if (line.equals("Start")) {
@@ -101,6 +118,27 @@ public class TCPServer {
                     } else {
                         System.out.println(line);
                     }
+                }
+                in.close();
+            }
+            catch (IOException e1) {
+                System.out.println("Socket Shutdown");
+                System.exit(0);
+            }
+        }
+    };
+
+    private Runnable readFromMap = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println("Read Thread listening");
+            int length;
+            byte[] buffer = new byte[1024];
+            try {
+                in = clients.get(1).getInputStream();
+                while ((length = in.read(buffer)) != -1) {
+                    String line = new String(buffer, 0, length);
+                    System.out.println(line);
                 }
                 in.close();
             }

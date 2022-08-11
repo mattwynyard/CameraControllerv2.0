@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import Bluetooth.BluetoothManager;
+import Bluetooth.SPPClient;
 /**
  * Main application class for CameraApp
  * Intialiases bluetooth adapter with camera id and handles the image build.
@@ -21,10 +22,8 @@ import Bluetooth.BluetoothManager;
  */
 public class CameraApp {
 
-    private static boolean connected = false;
-    private static boolean recording = false;
-    private static String status;
     private static BluetoothManager mBluetooth;
+    private static TCPServer mServer;
     private static int count = 0;
     private static String path;
 
@@ -47,12 +46,19 @@ public class CameraApp {
      * @param args
      */
     public static void main(String[] args) {
-
-        System.out.println("Inspector:" + args[0]);
-        System.out.println("Thumbnails saved to:" + args[1]);
-        path = args[1];
-        mBluetooth = new BluetoothManager(args[0]);
-        mBluetooth.start();
+        System.out.println("Connecting to phone: " + args[0]);
+        System.out.println("Inspector:" + args[1] + '\n');
+        System.out.println("Thumbnails saved to:" + args[2] + '\n');
+        path = args[2];
+        if (args[0].equals("True")) {
+            mServer = new TCPServer(38200, true);
+            System.out.println("Initialising bluetooth connection...\n");
+            mBluetooth = new BluetoothManager(args[1], mServer);
+            mBluetooth.start();
+        } else {
+            System.out.println("Starting server...\n");
+            //mServer = new TCPServer();
+        }
         Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
         while(true) {
             try {
@@ -85,8 +91,9 @@ public class CameraApp {
             System.out.println("jpeg save time: " + (end - start));
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        count++;
-
+        //count++;
     }
 }
