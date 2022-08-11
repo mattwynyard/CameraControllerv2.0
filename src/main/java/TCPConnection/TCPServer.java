@@ -85,12 +85,6 @@ public class TCPServer {
         accessWriter.flush();
     }
 
-    public void sendDataDBfromMap(String message) {
-        System.out.println(message);
-        mapWriter.print(message);
-        mapWriter.flush();
-    }
-
     public void sendDataAndroid(String message) {
         mPhoneClient.sendCommand(message);
     }
@@ -122,7 +116,7 @@ public class TCPServer {
     private Runnable readFromAccess = new Runnable() {
         @Override
         public void run() {
-            System.out.println("Read Thread listening");
+            System.out.println("Access Thread listening");
             int length;
             byte[] buffer = new byte[1024];
             try {
@@ -151,15 +145,14 @@ public class TCPServer {
     private Runnable readFromMap = new Runnable() {
         @Override
         public void run() {
-            System.out.println("Read Thread listening");
+            System.out.println("Map Thread listening");
             int length;
             byte[] buffer = new byte[1024];
             try {
                 mapReader = clients.get(1).getInputStream();
                 while ((length = mapReader.read(buffer)) != -1) {
                     String line = new String(buffer, 0, length);
-                    System.out.println(line);
-                    sendDataDBfromMap((line));
+                    sendDataDB((line));
                 }
                 mapReader.close();
             }
