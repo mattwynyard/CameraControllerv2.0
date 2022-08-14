@@ -22,6 +22,8 @@ public class TCPServer {
     private Thread mReadMapThread;
     private SPPClient mPhoneClient;
     private boolean phone;
+    private boolean phoneConnected = false;
+    private boolean mapConnected = false;
 
     public TCPServer(int port, boolean phone) {
         try {
@@ -43,10 +45,8 @@ public class TCPServer {
     public void start() {
         try {
                 Socket client = server.accept();
-                System.out.println("Client connected: " + client.toString());
-                System.out.println("Local Address: " + client.getLocalAddress());
-                System.out.println("Remote Address: " + client.getRemoteSocketAddress());
                 clients.add(client);
+                System.out.println("Client connected: " + client.toString());
                 System.out.println("Clients connected: " + clients.size());
                 accessWriter = new PrintWriter(client.getOutputStream()); //access
                 mReadAccessThread = new Thread(readFromAccess);
@@ -61,14 +61,12 @@ public class TCPServer {
         try {
             System.out.println("Opening map port");
             Socket client = server.accept();
-            System.out.println("Client connected: " + client.toString());
-            System.out.println("Local Address: " + client.getLocalAddress());
-            System.out.println("Remote Address: " + client.getRemoteSocketAddress());
             clients.add(client);
+            System.out.println("Client connected: " + client.toString());
             System.out.println("Clients connected: " + clients.size());
-            mapWriter = new PrintWriter(client.getOutputStream()); //access
+            mapWriter = new PrintWriter(client.getOutputStream()); //map
             mReadMapThread = new Thread(readFromMap);
-            mReadMapThread.setPriority(Thread.MAX_PRIORITY);
+            if (!phoneConnected) mReadMapThread.setPriority(Thread.MAX_PRIORITY);
             mReadMapThread.start();
         } catch (IOException e) {
             System.out.println("Error: " + e);
@@ -79,10 +77,16 @@ public class TCPServer {
      *
      * @param message - the message to be sent.
      */
-    public void sendDataDB(String message) {
+    public synchronized void sendDataDB(String message) {
         System.out.println(message);
         accessWriter.print(message);
         accessWriter.flush();
+    }
+
+    public void sendDataMap(String message) {
+        System.out.println(message);
+        mapWriter.print(message);
+        mapWriter.flush();
     }
 
     public void sendDataAndroid(String message) {
@@ -121,6 +125,7 @@ public class TCPServer {
             byte[] buffer = new byte[1024];
             try {
                 accessReader = clients.get(0).getInputStream();
+                phoneConnected = true;
                 while ((length = accessReader.read(buffer)) != -1) {
                     String line = new String(buffer, 0, length);
                     if (line.equals("Start")) {
@@ -135,7 +140,9 @@ public class TCPServer {
                 }
                 accessReader.close();
             }
-            catch (IOException e1) {
+            catch (IOException err) {
+                err.printStackTrace();
+                phoneConnected = false;
                 System.out.println("Socket Shutdown");
                 System.exit(0);
             }
@@ -147,18 +154,27 @@ public class TCPServer {
         public void run() {
             System.out.println("Map Thread listening");
             int length;
-            byte[] buffer = new byte[1024];
+            byte[] buffer = new byte[4 * 1024];
             try {
                 mapReader = clients.get(1).getInputStream();
+                mapConnected = true;
                 while ((length = mapReader.read(buffer)) != -1) {
                     String line = new String(buffer, 0, length);
                     sendDataDB((line));
                 }
                 mapReader.close();
             }
-            catch (IOException e1) {
-                System.out.println("Socket Shutdown");
-                System.exit(0);
+            catch (Exception err) {
+                err.printStackTrace();
+                mapConnected = false;
+                System.out.println("Map Socket Shutdown");
+                clients.remove(1);
+                try {
+                    Thread.sleep(5000);
+                } catch (Exception e) {
+
+                }
+                startMap();
             }
         }
     };

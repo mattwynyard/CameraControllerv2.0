@@ -178,29 +178,29 @@ public class BluetoothManager implements DiscoveryListener {
 				searchLock.notifyAll();
 			}
 			switch (respCode) {
-			case DiscoveryListener.SERVICE_SEARCH_COMPLETED:
-				System.out.println("SERVICE_SEARCH_COMPLETED");
-				break;
-		
-			case DiscoveryListener.SERVICE_SEARCH_TERMINATED:
-				System.out.println("SERVICE_SEARCH_TERMINATED");
-				break;
-		
-			case DiscoveryListener.SERVICE_SEARCH_ERROR:
-				System.out.println("SERVICE_SEARCH_ERROR");
-				break;
-				
-			case DiscoveryListener.SERVICE_SEARCH_NO_RECORDS:
-				System.out.println("SERVICE_SEARCH_NO_RECORDS");
-				break;
-				
-			case DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE:
-				System.out.println("SERVICE_SEARCH_DEVICE_NOT_REACHABLE");
-				break;
-		
-			default :
-				System.out.println("Unknown Response Code");
-				break;
+				case DiscoveryListener.SERVICE_SEARCH_COMPLETED:
+					System.out.println("SERVICE_SEARCH_COMPLETED");
+					break;
+
+				case DiscoveryListener.SERVICE_SEARCH_TERMINATED:
+					System.out.println("SERVICE_SEARCH_TERMINATED");
+					break;
+
+				case DiscoveryListener.SERVICE_SEARCH_ERROR:
+					System.out.println("SERVICE_SEARCH_ERROR");
+					break;
+
+				case DiscoveryListener.SERVICE_SEARCH_NO_RECORDS:
+					System.out.println("SERVICE_SEARCH_NO_RECORDS");
+					break;
+
+				case DiscoveryListener.SERVICE_SEARCH_DEVICE_NOT_REACHABLE:
+					System.out.println("SERVICE_SEARCH_DEVICE_NOT_REACHABLE");
+					break;
+
+				default :
+					System.out.println("Unknown Response Code");
+					break;
 			}
 		}
 	/**
@@ -213,21 +213,21 @@ public class BluetoothManager implements DiscoveryListener {
 			enquiryLock.notifyAll();
 		}
 		switch (discType) {
-		case DiscoveryListener.INQUIRY_COMPLETED :
-			System.out.println("INQUIRY_COMPLETED");
-			break;
-	
-		case DiscoveryListener.INQUIRY_TERMINATED :
-			System.out.println("INQUIRY_TERMINATED");
-			break;
-	
-		case DiscoveryListener.INQUIRY_ERROR :
-			System.out.println("INQUIRY_ERROR");
-			break;
-	
-		default :
-			System.out.println("Unknown Response Code");
-			break;
+			case DiscoveryListener.INQUIRY_COMPLETED :
+				System.out.println("INQUIRY_COMPLETED");
+				break;
+
+			case DiscoveryListener.INQUIRY_TERMINATED :
+				System.out.println("INQUIRY_TERMINATED");
+				break;
+
+			case DiscoveryListener.INQUIRY_ERROR :
+				System.out.println("INQUIRY_ERROR");
+				break;
+
+			default :
+				System.out.println("Unknown Response Code");
+				break;
 		}
 	}//end method
 } //end class

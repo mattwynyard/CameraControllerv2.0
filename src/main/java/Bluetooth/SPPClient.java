@@ -227,12 +227,6 @@ public class SPPClient extends Thread {
                             }
                         } catch (OutOfMemoryError e){
                             e.printStackTrace();
-                            System.out.println("byte buffer length: " + byteBuffer.size());
-                            System.out.println("buffer length: " + len);
-                            System.out.println("payload length: " + payloadSize);
-                            System.out.println("message length: " + messageSize);
-                            System.out.println("photo length: " + photoSize);
-                            System.out.println("meta data: " + metadata);
                             metadata = true;
                             byteBuffer.reset();
                             mPhotoOut.reset();
@@ -241,12 +235,6 @@ public class SPPClient extends Thread {
                             mTCP.sendDataDB("NOTRECORDING,");
                         } catch (IndexOutOfBoundsException e){
                             e.printStackTrace();
-                            System.out.println("byte buffer length: " + byteBuffer.size());
-                            System.out.println("buffer length: " + len);
-                            System.out.println("payload length: " + payloadSize);
-                            System.out.println("message length: " + messageSize);
-                            System.out.println("photo length: " + photoSize);
-                            System.out.println("meta data: " + metadata);
                             metadata = true;
                             byteBuffer.reset();
                             mPhotoOut.reset();
@@ -269,7 +257,9 @@ public class SPPClient extends Thread {
                 System.out.println(("error reading bluetooth stream"));
                 closeAll();
                 if (mTCP != null) {
+                    mTCP.sendDataAndroid("Stop");
                     mTCP.sendDataDB("NOTCONNECTED,");
+                    mTCP.sendDataDB("NOTRECORDING,");
                 }
             } catch (IOException e) {
                 closeAll();
