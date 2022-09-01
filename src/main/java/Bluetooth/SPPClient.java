@@ -9,7 +9,6 @@ package Bluetooth;
 import java.io.*;
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Scanner;
 import javax.microedition.io.Connector;
 import javax.microedition.io.StreamConnection;
 import TCPConnection.CameraApp;
@@ -26,16 +25,12 @@ public class SPPClient extends Thread {
     private BufferedReader reader; //Android reader
     public TCPServer mTCP;
     private Thread mReadThread;
-    private ByteArrayOutputStream mMessageOut;
-    private ByteArrayOutputStream mPhotoOut;
 
     public SPPClient(String connectionURL, TCPServer server) {
         this.mTCP = server;
         try {
             mStreamConnection = (StreamConnection) Connector.open(connectionURL);
-            if (mStreamConnection != null) {
-                connected = true;
-            }
+            connected = true;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -56,12 +51,8 @@ public class SPPClient extends Thread {
             mReadThread = new Thread(readFromAndroid);
             mReadThread.setPriority(Thread.MAX_PRIORITY);
             mReadThread.start();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } catch (NullPointerException e1) {
-            e1.printStackTrace();
-        } catch (Exception e2) {
-            e2.printStackTrace();
         }
     }
 
@@ -145,15 +136,15 @@ public class SPPClient extends Thread {
         writer.flush();
     }
 
-    private Runnable readFromAndroid = new Runnable() {
+    private final Runnable readFromAndroid = new Runnable() {
         @Override
         public void run() {
         System.out.println("Reading From Android");
             try {
                 in = mStreamConnection.openInputStream();
                 byte[] buffer = new byte[1024];
-                mMessageOut = new ByteArrayOutputStream();
-                mPhotoOut = new ByteArrayOutputStream();
+                ByteArrayOutputStream mMessageOut = new ByteArrayOutputStream();
+                ByteArrayOutputStream mPhotoOut = new ByteArrayOutputStream();
                 ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
                 int len;
                 String recording;
@@ -163,12 +154,12 @@ public class SPPClient extends Thread {
                 String photoName;
                 boolean metadata = true;
                 int payloadSize = 0;
-                int messageSize = 0;
-                int photoSize = 0;
+                int messageSize;
+                int photoSize;
 
                 while ((len = in.read(buffer)) != -1) {
                     byteBuffer.write(buffer, 0, len); //read in total buffer from socket
-                    if (metadata == true) {
+                    if (metadata) {
                         payloadSize = decodeInteger(Arrays.copyOfRange(byteBuffer.toByteArray(), 0, 4), 0);
                     }
                     metadata = false;
@@ -186,11 +177,11 @@ public class SPPClient extends Thread {
                         mMessageOut.write(byteBuffer.toByteArray(), 13, 4);
                         battery = decodeInteger(mMessageOut.toByteArray(), 0);
                         mMessageOut.reset();
-                        mTCP.sendDataDB("B:" + Integer.toString(battery) + ",");
+                        mTCP.sendDataDB("B:" + battery + ",");
                         mMessageOut.write(byteBuffer.toByteArray(), 17, 4);
                         error = decodeInteger(mMessageOut.toByteArray(), 0);
                         mMessageOut.reset();
-                        mTCP.sendDataDB("E:" + Integer.toString(error) + ",");
+                        mTCP.sendDataDB("E:" + error + ",");
                         mMessageOut.write(byteBuffer.toByteArray(), 21, messageSize);
                         message = new String(mMessageOut.toByteArray(), "UTF-8");
                         mMessageOut.reset();
@@ -213,7 +204,7 @@ public class SPPClient extends Thread {
                             } else {
                                 if (photoSize != 0) {
                                     mPhotoOut.write(byteBuffer.toByteArray(), 21 + messageSize, photoSize);
-                                    System.out.println("photoOut: "+ mPhotoOut.size());
+                                    System.out.println("photoOut: " + mPhotoOut.size());
                                     photoName = message.substring(26, 52); //handle millisecond
                                     final String photo = photoName;
                                     CameraApp.setIcon(mPhotoOut.toByteArray(), photo);
@@ -225,23 +216,6 @@ public class SPPClient extends Thread {
                                     metadata = true;
                                 }
                             }
-                        } catch (OutOfMemoryError e){
-                            e.printStackTrace();
-                            metadata = true;
-                            byteBuffer.reset();
-                            mPhotoOut.reset();
-                            mMessageOut.reset();
-                            mTCP.sendDataAndroid("Stop");
-                            mTCP.sendDataDB("NOTRECORDING,");
-                        } catch (IndexOutOfBoundsException e){
-                            e.printStackTrace();
-                            metadata = true;
-                            byteBuffer.reset();
-                            mPhotoOut.reset();
-                            mMessageOut.reset();
-                            buffer = clearBuffer();
-                            mTCP.sendDataAndroid("Stop");
-                            mTCP.sendDataDB("NOTRECORDING,");
                         } catch (Exception e){
                             e.printStackTrace();
                             metadata = true;
@@ -255,14 +229,16 @@ public class SPPClient extends Thread {
                     }
                 }
                 System.out.println(("error reading bluetooth stream"));
-                closeAll();
                 if (mTCP != null) {
                     mTCP.sendDataAndroid("Stop");
                     mTCP.sendDataDB("NOTCONNECTED,");
                     mTCP.sendDataDB("NOTRECORDING,");
                 }
-            } catch (IOException e) {
                 closeAll();
+                System.exit(0);
+            } catch (Exception e) {
+                closeAll();
+                System.exit(-1);
                 e.printStackTrace();
             }
         }
