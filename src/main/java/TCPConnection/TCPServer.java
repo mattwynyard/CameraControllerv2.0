@@ -21,20 +21,21 @@ public class TCPServer {
     private Thread mReadAccessThread;
     private Thread mReadMapThread;
     private SPPClient mPhoneClient;
-    private boolean phone;
+    private boolean hasPhone;
+    private boolean hasMap;
     private boolean phoneConnected = false;
     private boolean mapConnected = false;
 
-    public TCPServer(int port, boolean phone) {
+    public TCPServer(int port, boolean hasPhone) {
         try {
             server = new ServerSocket(port, 0, InetAddress.getByName(null));
             clients = new ArrayList<Socket>();
-            this.phone = phone;
+            this.hasPhone = hasPhone;
         } catch (IOException e) {
             System.out.println("Error: " + e);
             return;
         }
-        if (phone) start();
+        start();
     }
 
     //called from SPPClient before thread start
@@ -61,6 +62,7 @@ public class TCPServer {
         try {
             System.out.println("Opening map port");
             Socket client = server.accept();
+            this.hasMap = true;
             clients.add(client);
             System.out.println("Client connected: " + client.toString());
             System.out.println("Clients connected: " + clients.size());
@@ -129,11 +131,17 @@ public class TCPServer {
                 while ((length = accessReader.read(buffer)) != -1) {
                     String line = new String(buffer, 0, length);
                     if (line.equals("Start")) {
-                        sendDataAndroid(line);
+                        //if (this.hasPhone){
+                            sendDataAndroid(line);
+                        //}
                     } else if (line.equals("Stop")) {
-                        sendDataAndroid(line);
+                        //if (this.phone) {
+                            sendDataAndroid(line);
+                        //}
                     } else if (line.contains("Time")){
-                        sendDataAndroid(line);
+                        //if (this.phone) {
+                            sendDataAndroid(line);
+                        //}
                     } else {
                         System.out.println(line);
                     }

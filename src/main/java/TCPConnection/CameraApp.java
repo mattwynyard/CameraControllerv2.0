@@ -49,6 +49,7 @@ public class CameraApp {
         System.out.println("Connecting to map: " + args[1]);
         System.out.println("Inspector:" + args[2] + '\n');
         System.out.println("Thumbnails saved to:" + args[3] + '\n');
+        //System.out.println("Connecting to port:" + args[4] + '\n');
         path = args[3];
         if (args[0].equals("True")) {
             mServer = new TCPServer(38200, true);
