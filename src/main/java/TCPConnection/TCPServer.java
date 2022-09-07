@@ -54,7 +54,7 @@ public class TCPServer {
                 mReadAccessThread.setPriority(Thread.MAX_PRIORITY);
                 mReadAccessThread.start();
         } catch (IOException e) {
-            System.out.println("Error: " + e);
+            e.printStackTrace();
         }
     }
 
@@ -71,7 +71,7 @@ public class TCPServer {
             if (!phoneConnected) mReadMapThread.setPriority(Thread.MAX_PRIORITY);
             mReadMapThread.start();
         } catch (IOException e) {
-            System.out.println("Error: " + e);
+            e.printStackTrace();
         }
     }
 
@@ -180,9 +180,9 @@ public class TCPServer {
                 try {
                     Thread.sleep(5000);
                 } catch (Exception e) {
-
+                    err.printStackTrace();
                 }
-                startMap();
+                //startMap();
             }
         }
     };

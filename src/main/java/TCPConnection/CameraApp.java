@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
 import Bluetooth.BluetoothManager;
-import Bluetooth.SPPClient;
 /**
  * Main application class for CameraApp
  * Intialiases bluetooth adapter with camera id and handles the image build.
@@ -64,10 +63,10 @@ public class CameraApp {
             mServer = new TCPServer(38200, false);
             mServer.startMap();
         }
-        //Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
+        Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
         while(true) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -94,8 +93,6 @@ public class CameraApp {
             in.close();
             long end = System.currentTimeMillis();
             System.out.println("jpeg save time: " + (end - start));
-        } catch (IOException e) {
-            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
