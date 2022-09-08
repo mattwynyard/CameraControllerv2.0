@@ -31,11 +31,12 @@ public class TCPServer {
             server = new ServerSocket(port, 0, InetAddress.getByName(null));
             clients = new ArrayList<Socket>();
             this.hasPhone = hasPhone;
-        } catch (IOException e) {
-            System.out.println("Error: " + e);
-            return;
+            start();
+        } catch (IOException err) {
+            CameraApp.logError(err.toString());
+            System.out.println("Error: " + err);
         }
-        start();
+
     }
 
     //called from SPPClient before thread start
@@ -53,8 +54,9 @@ public class TCPServer {
                 mReadAccessThread = new Thread(readFromAccess);
                 mReadAccessThread.setPriority(Thread.MAX_PRIORITY);
                 mReadAccessThread.start();
-        } catch (IOException e) {
-            System.out.println("Error: " + e);
+        } catch (IOException err) {
+            CameraApp.logError(err.toString());
+            System.out.println("Error: " + err);
         }
     }
 
@@ -70,8 +72,9 @@ public class TCPServer {
             mReadMapThread = new Thread(readFromMap);
             if (!phoneConnected) mReadMapThread.setPriority(Thread.MAX_PRIORITY);
             mReadMapThread.start();
-        } catch (IOException e) {
-            System.out.println("Error: " + e);
+        } catch (IOException err) {
+            CameraApp.logError(err.toString());
+            System.out.println("Error: " + err);
         }
     }
 
@@ -81,8 +84,13 @@ public class TCPServer {
      */
     public synchronized void sendDataDB(String message) {
         System.out.println(message);
-        accessWriter.print(message);
-        accessWriter.flush();
+        try {
+            accessWriter.print(message);
+            accessWriter.flush();
+        } catch (Exception err) {
+            CameraApp.logError(err.toString());
+        }
+
     }
 
     public void sendDataMap(String message) {
@@ -92,7 +100,11 @@ public class TCPServer {
     }
 
     public void sendDataAndroid(String message) {
-        mPhoneClient.sendCommand(message);
+        try {
+            mPhoneClient.sendCommand(message);
+        } catch (Exception err) {
+            CameraApp.logError(err.toString());
+        }
     }
 
     /**
@@ -146,9 +158,11 @@ public class TCPServer {
                         System.out.println(line);
                     }
                 }
+                CameraApp.logError("access socket shutdown");
                 accessReader.close();
             }
             catch (IOException err) {
+                CameraApp.logError(err.toString());
                 err.printStackTrace();
                 phoneConnected = false;
                 System.out.println("Socket Shutdown");
@@ -174,6 +188,7 @@ public class TCPServer {
             }
             catch (Exception err) {
                 err.printStackTrace();
+                CameraApp.logError(err.toString());
                 mapConnected = false;
                 System.out.println("Map Socket Shutdown");
                 clients.remove(1);

@@ -8,10 +8,9 @@ package TCPConnection;
 
 
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.imageio.ImageIO;
 import Bluetooth.BluetoothManager;
 import Bluetooth.SPPClient;
@@ -26,37 +25,28 @@ public class CameraApp {
     private static TCPServer mServer;
     private static int count = 0;
     private static String path;
+    private static final int CYCLE = 100; //milliseconds
 
-    private static Runnable ShutdownHook = new Runnable() {
-        @Override
-        public void run () {
-            if (mBluetooth.mClient != null) {
-                mServer.sendDataDB("NOTRECORDING,");
-                mServer.sendDataDB("NOTCONNECTED,");
-                mServer.sendDataDB("ERROR,");
-                mServer.closeAll();
-            }
-        }
-    };
+    private static File errorFile;
+    private static SimpleDateFormat sdfDate;
 
-    /**
-     * Main program entry point - takes an arguement sent from access which is the camera id,
-     * to setup bluetooth adapter name
-     * @param args
-     */
     public static void main(String[] args) {
-        System.out.println("Connecting to phone: " + args[0]);
-        System.out.println("Connecting to map: " + args[1]);
-        System.out.println("Inspector:" + args[2] + '\n');
-        System.out.println("Thumbnails saved to:" + args[3] + '\n');
-        //System.out.println("Connecting to port:" + args[4] + '\n');
-        path = args[3];
-        if (args[0].equals("True")) {
+        System.out.println("Connecting to phone: " + args[1]);
+        System.out.println("Connecting to map: " + args[2]);
+        System.out.println("Inspector:" + args[3] + '\n');
+        System.out.println("Thumbnails saved to:" + args[4]);
+        System.out.println("Log file at:" + args[0] + '\n');
+        errorFile = new File(args[0]);
+        //errorFile = new File("N:\\Onsite\\Android\\Testing\\errorLog.txt");
+        sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        path = args[4];
+        if (args[1].equals("True")) {
             mServer = new TCPServer(38200, true);
             System.out.println("Initialising bluetooth connection...\n");
-            mBluetooth = new BluetoothManager(args[2], mServer);
+            mBluetooth = new BluetoothManager(args[3], mServer);
             mBluetooth.start();
-            if (args[1].equals("True")) {
+            if (args[2].equals("True")) {
                 mServer.startMap();
             }
         } else {
@@ -65,19 +55,37 @@ public class CameraApp {
             mServer.startMap();
         }
         //Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
-        while(true) {
+        while (true) {
             try {
-                Thread.sleep(100);
+                Thread.sleep(CYCLE);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    public static void logError(String err) {
+        try {
+            FileWriter fw = new FileWriter(errorFile, true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            PrintWriter out = new PrintWriter(bw);
+            sdfDate.format(new Date());
+            out.println(sdfDate.format(new Date()) + ": " + err);
+            out.flush();
+            fw.close();
+            bw.close();
+            out.close();
+
+        } catch (IOException e) {
+            System.out.println("error: " + e.getMessage());
+        }
+    }
+
     /**
      * Reads in byte array to input stream to build a buffered image, then writes jpeg image to disk
+     *
      * @param bytes - byte array containing pixel data for the image
-     * @param name - the photo name
+     * @param name  - the photo name
      */
     public static void setIcon(byte[] bytes, final String name) {
         try {
@@ -93,7 +101,7 @@ public class CameraApp {
             }
             in.close();
             long end = System.currentTimeMillis();
-            System.out.println("jpeg save time: " + (end - start));
+            System.out.println("jpeg save time: " + (end - start) + "ms");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (Exception e) {
@@ -101,3 +109,15 @@ public class CameraApp {
         }
     }
 }
+
+//private static Runnable ShutdownHook = new Runnable() {
+//        @Override
+//        public void run () {
+//            if (mBluetooth.mClient != null) {
+//                mServer.sendDataDB("NOTRECORDING,");
+//                mServer.sendDataDB("NOTCONNECTED,");
+//                mServer.sendDataDB("ERROR,");
+//                mServer.closeAll();
+//            }
+//        }
+//    };

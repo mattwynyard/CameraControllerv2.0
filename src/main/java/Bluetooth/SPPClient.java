@@ -32,6 +32,7 @@ public class SPPClient extends Thread {
             mStreamConnection = (StreamConnection) Connector.open(connectionURL);
             connected = true;
         } catch (IOException e) {
+            CameraApp.logError(e.toString());
             e.printStackTrace();
         }
     }
@@ -52,6 +53,7 @@ public class SPPClient extends Thread {
             mReadThread.setPriority(Thread.MAX_PRIORITY);
             mReadThread.start();
         } catch (Exception e) {
+            CameraApp.logError(e.toString());
             e.printStackTrace();
         }
     }
@@ -68,6 +70,7 @@ public class SPPClient extends Thread {
             mStreamConnection = null;
             mReadThread = null;
         } catch (IOException e) {
+            CameraApp.logError(e.toString());
             e.printStackTrace();
         }
     }
@@ -103,8 +106,9 @@ public class SPPClient extends Thread {
         int value = new BigInteger(temp.toByteArray()).intValue();
         try {
             temp.close();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
+            CameraApp.logError(e.toString());
         }
         return value;
     }
@@ -225,10 +229,12 @@ public class SPPClient extends Thread {
                             buffer = clearBuffer();
                             mTCP.sendDataAndroid("Stop");
                             mTCP.sendDataDB("NOTRECORDING,");
+                            CameraApp.logError(e.toString());
                         }
                     }
                 }
                 System.out.println(("error reading bluetooth stream"));
+                CameraApp.logError("error reading bluetooth stream");
                 if (mTCP != null) {
                     mTCP.sendDataAndroid("Stop");
                     mTCP.sendDataDB("NOTCONNECTED,");
@@ -237,6 +243,7 @@ public class SPPClient extends Thread {
                 closeAll();
                 System.exit(0);
             } catch (Exception e) {
+                CameraApp.logError(e.toString());
                 closeAll();
                 System.exit(-1);
                 e.printStackTrace();
