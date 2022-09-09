@@ -198,6 +198,7 @@ public class SPPClient extends Thread {
                                     photoName = message.substring(26, 52); //handle millisecond
                                     final String photo = photoName;
                                     CameraApp.setIcon(mPhotoOut.toByteArray(), photo);
+                                    //mTCP.sendDataDB(message);
                                 }
                                 ByteArrayOutputStream tempBuffer = new ByteArrayOutputStream();
                                 tempBuffer.write(byteBuffer.toByteArray(), payloadSize, byteBuffer.size() - payloadSize);
@@ -212,6 +213,7 @@ public class SPPClient extends Thread {
                                     photoName = message.substring(26, 52); //handle millisecond
                                     final String photo = photoName;
                                     CameraApp.setIcon(mPhotoOut.toByteArray(), photo);
+                                    //mTCP.sendDataDB(message);
                                     byteBuffer.reset();
                                     mPhotoOut.reset();
                                     metadata = true;
@@ -220,6 +222,7 @@ public class SPPClient extends Thread {
                                     metadata = true;
                                 }
                             }
+                            //mTCP.sendDataDB(message);
                         } catch (Exception e){
                             e.printStackTrace();
                             metadata = true;
