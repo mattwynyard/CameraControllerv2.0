@@ -23,10 +23,10 @@ import javax.bluetooth.UUID;
 public class BluetoothManager implements DiscoveryListener {
 	
 	private LocalDevice mLocalDevice;
-	private RemoteDevice mRemoteDevice;
+	//private RemoteDevice mRemoteDevice;
 	private DiscoveryAgent mAgent;
 	private String id;
-	final Object lock = new Object();
+	//final Object lock = new Object();
 	final Object enquiryLock = new Object();
 	final Object searchLock = new Object();
     //vector containing the devices discovered, kept as Vector in case we need to a more remote devices
@@ -77,15 +77,6 @@ public class BluetoothManager implements DiscoveryListener {
 			mAgent.cancelInquiry(this);
 		} else {
             System.out.println("Device count: " + deviceCount);
-			for (int i = 0; i < deviceCount; i++) {
-				mRemoteDevice = mDevices.elementAt(i);
-				try {
-					System.out.println((i + 1) + ". " + mRemoteDevice.getBluetoothAddress() +
-							" (" + mRemoteDevice.getFriendlyName(true) + ")");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 		/**
@@ -148,9 +139,6 @@ public class BluetoothManager implements DiscoveryListener {
 	 * @param servRecord - a list of services found during the search request.
 	 */
 		public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-			synchronized (lock) {
-				lock.notifyAll();
-			}
 			System.out.println("Service discovered");
 			connectionURL = servRecord[0].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, true);
 			System.out.println(connectionURL);

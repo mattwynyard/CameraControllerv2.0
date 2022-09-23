@@ -37,7 +37,6 @@ public class CameraApp {
         System.out.println("Thumbnails saved to:" + args[4]);
         System.out.println("Log file at:" + args[0] + '\n');
         errorFile = new File(args[0]);
-        //errorFile = new File("N:\\Onsite\\Android\\Testing\\errorLog.txt");
         sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         path = args[4];
