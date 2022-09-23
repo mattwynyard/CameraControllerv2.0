@@ -22,7 +22,7 @@ public class SPPClient extends Thread {
     private OutputStream out; //Android out
     private InputStream in; //Android in
     private PrintWriter writer; //Android writer
-    private BufferedReader reader; //Android reader
+    //private BufferedReader reader; //Android reader
     public TCPServer mTCP;
     private Thread mReadThread;
 
@@ -66,7 +66,7 @@ public class SPPClient extends Thread {
             out.close();
             in.close();
             writer = null;
-            reader = null;
+            //reader = null;
             mStreamConnection = null;
             mReadThread = null;
         } catch (IOException e) {
@@ -75,30 +75,30 @@ public class SPPClient extends Thread {
         }
     }
 
-    public static void executeOnNewThread(final Runnable runnable) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                runnable.run();
-            }
-        }).start();
-    }
+//    public static void executeOnNewThread(final Runnable runnable) {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                runnable.run();
+//            }
+//        }).start();
+//    }
 
     public byte[] clearBuffer() {
         return new byte[1024];
     }
 
-    private String decodeIntToString(byte[] buffer, int offset) {
-        ByteArrayOutputStream temp = new ByteArrayOutputStream();
-        temp.write(buffer, offset, 4);
-        int value = new BigInteger(temp.toByteArray()).intValue();
-        try {
-            temp.close();
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-        return String.valueOf(value);
-    }
+//    private String decodeIntToString(byte[] buffer, int offset) {
+//        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+//        temp.write(buffer, offset, 4);
+//        int value = new BigInteger(temp.toByteArray()).intValue();
+//        try {
+//            temp.close();
+//        }catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return String.valueOf(value);
+//    }
 
     private int decodeInteger(byte[] buffer, int offset) {
         ByteArrayOutputStream temp = new ByteArrayOutputStream();
@@ -113,22 +113,22 @@ public class SPPClient extends Thread {
         return value;
     }
 
-    private String decodeString(byte[] buffer, int offset, int length) {
-        String message = null;
-        ByteArrayOutputStream temp = new ByteArrayOutputStream();
-        temp.write(buffer, offset, length);
-        try {
-            message = new String(temp.toByteArray(), "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        try {
-            temp.close();
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-        return message;
-    }
+//    private String decodeString(byte[] buffer, int offset, int length) {
+//        String message = null;
+//        ByteArrayOutputStream temp = new ByteArrayOutputStream();
+//        temp.write(buffer, offset, length);
+//        try {
+//            message = new String(temp.toByteArray(), "UTF-8");
+//        } catch (UnsupportedEncodingException e) {
+//            e.printStackTrace();
+//        }
+//        try {
+//            temp.close();
+//        }catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        return message;
+//    }
 
     /**
      * Sends command to Android phone via bluetooth connection
@@ -171,7 +171,7 @@ public class SPPClient extends Thread {
                         messageSize = decodeInteger(Arrays.copyOfRange(byteBuffer.toByteArray(), 4, 8), 0);
                         photoSize = decodeInteger(Arrays.copyOfRange(byteBuffer.toByteArray(), 8, 12), 0);
                         mMessageOut.write(byteBuffer.toByteArray(), 12, 1);
-                        recording = new String(mMessageOut.toByteArray(), "UTF-8");
+                        recording = mMessageOut.toString("UTF-8");
                         mMessageOut.reset();
                         if (recording.equals("N")) {
                             mTCP.sendDataDB("NOTRECORDING,");

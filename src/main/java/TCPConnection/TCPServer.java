@@ -6,9 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import Bluetooth.SPPClient;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 
 public class TCPServer {
 
@@ -48,8 +45,8 @@ public class TCPServer {
         try {
                 Socket client = server.accept();
                 clients.add(client);
-                System.out.println("Client connected: " + client.toString());
-                System.out.println("Clients connected: " + clients.size());
+                System.out.println("Access client connected on socket: " + client.toString());
+                //System.out.println("Clients connected: " + clients.size());
                 accessWriter = new PrintWriter(client.getOutputStream()); //access
                 mReadAccessThread = new Thread(readFromAccess);
                 mReadAccessThread.setPriority(Thread.MAX_PRIORITY);
@@ -131,7 +128,7 @@ public class TCPServer {
      * To run in the background,  reads incoming data
      * from the client - access
      */
-    private Runnable readFromAccess = new Runnable() {
+    private final Runnable readFromAccess = new Runnable() {
         @Override
         public void run() {
             System.out.println("Access Thread listening");
@@ -171,7 +168,7 @@ public class TCPServer {
         }
     };
 
-    private Runnable readFromMap = new Runnable() {
+    private final Runnable readFromMap = new Runnable() {
         @Override
         public void run() {
             System.out.println("Map Thread listening");

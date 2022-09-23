@@ -13,7 +13,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.imageio.ImageIO;
 import Bluetooth.BluetoothManager;
-import Bluetooth.SPPClient;
 /**
  * Main application class for CameraApp
  * Intialiases bluetooth adapter with camera id and handles the image build.
@@ -21,11 +20,9 @@ import Bluetooth.SPPClient;
  */
 public class CameraApp {
 
-    private static BluetoothManager mBluetooth;
-    private static TCPServer mServer;
-    private static int count = 0;
+    //private static int count = 0;
     private static String path;
-    private static final int CYCLE = 100; //milliseconds
+    //private static final int CYCLE = 100; //milliseconds
 
     private static File errorFile;
     private static SimpleDateFormat sdfDate;
@@ -38,13 +35,13 @@ public class CameraApp {
         System.out.println("Log file at:" + args[0] + '\n');
         errorFile = new File(args[0]);
         sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+        TCPServer mServer;
         path = args[4];
         if (args[1].equals("True")) {
             mServer = new TCPServer(38200, true);
             System.out.println("Initialising bluetooth connection...\n");
-            mBluetooth = new BluetoothManager(args[3], mServer);
-            mBluetooth.start();
+            BluetoothManager manager = new BluetoothManager(args[3], mServer);
+            manager.start();
             if (args[2].equals("True")) {
                 mServer.startMap();
             }
@@ -54,12 +51,15 @@ public class CameraApp {
             mServer.startMap();
         }
         //Runtime.getRuntime().addShutdownHook(new Thread(ShutdownHook));
-        while (true) {
-            try {
-                Thread.sleep(CYCLE);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        try {
+            Object lock = new Object();
+            synchronized (lock) {
+                while (true) {
+                    lock.wait();
+                }
             }
+        } catch (InterruptedException ex) {
+            System.exit(-1);
         }
     }
 
