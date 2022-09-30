@@ -21,21 +21,16 @@ import javax.bluetooth.UUID;
 
 
 public class BluetoothManager implements DiscoveryListener {
-	
 	private LocalDevice mLocalDevice;
-	private RemoteDevice mRemoteDevice;
 	private DiscoveryAgent mAgent;
 	private String id;
-	final Object lock = new Object();
 	final Object enquiryLock = new Object();
 	final Object searchLock = new Object();
-    //vector containing the devices discovered, kept as Vector in case we need to a more remote devices
-	private Vector<RemoteDevice> mDevices = new Vector();
+	private final Vector<RemoteDevice> mDevices = new Vector();
 	private String connectionURL = null;
 	public SPPClient mClient;
 	public TCPServer mServer;
 	private long start;
-	private long stop;
 
 	public BluetoothManager(String id, TCPServer server) {
 		try {	
@@ -47,14 +42,14 @@ public class BluetoothManager implements DiscoveryListener {
 			e.printStackTrace();
 		}
 	}
-
 	/**
-	 * Main entry point for Bluetooth manager. Intialises the discovery agent and then searches for bluetooth devices
+	 * Main entry point for Bluetooth manager. Initialises the discovery agent and then searches for bluetooth devices
 	 * Device discovery and connection is handled by the bluecove callbacks.
 	 */
 	public void start() {
 		System.out.println("Local Bluetooth Address: " + mLocalDevice.getBluetoothAddress());
-		System.out.println("Local Computer Name: " + mLocalDevice.getFriendlyName());
+		System.out.println("Local Computer Name: " + mLocalDevice.getFriendlyName() + '\n');
+		System.out.println("Searching for devices.....");
         start = System.currentTimeMillis();
 		try {
 			synchronized (enquiryLock) {
@@ -63,8 +58,8 @@ public class BluetoothManager implements DiscoveryListener {
 				mAgent.startInquiry(DiscoveryAgent.LIAC, this);
 			} catch (BluetoothStateException e){
 				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
+//			} catch (IOException e) {
+//				e.printStackTrace();
 			}
 				enquiryLock.wait();
 			}
@@ -77,15 +72,6 @@ public class BluetoothManager implements DiscoveryListener {
 			mAgent.cancelInquiry(this);
 		} else {
             System.out.println("Device count: " + deviceCount);
-			for (int i = 0; i < deviceCount; i++) {
-				mRemoteDevice = mDevices.elementAt(i);
-				try {
-					System.out.println((i + 1) + ". " + mRemoteDevice.getBluetoothAddress() +
-							" (" + mRemoteDevice.getFriendlyName(true) + ")");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
 		}
 	}
 		/**
@@ -148,9 +134,6 @@ public class BluetoothManager implements DiscoveryListener {
 	 * @param servRecord - a list of services found during the search request.
 	 */
 		public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-			synchronized (lock) {
-				lock.notifyAll();
-			}
 			System.out.println("Service discovered");
 			connectionURL = servRecord[0].getConnectionURL(ServiceRecord.NOAUTHENTICATE_NOENCRYPT, true);
 			System.out.println(connectionURL);
@@ -159,7 +142,7 @@ public class BluetoothManager implements DiscoveryListener {
 			//Creates client running on new thread on specified url
 			mClient = new SPPClient(connectionURL, mServer);
 			if (mClient.isConnected()) {
-				stop = System.currentTimeMillis();
+				long stop = System.currentTimeMillis();
 				System.out.println("Device discovery: " + ((stop - start)/ 1000) + " s");
 				mClient.start();
 			} else {
@@ -229,5 +212,5 @@ public class BluetoothManager implements DiscoveryListener {
 				System.out.println("Unknown Response Code");
 				break;
 		}
-	}//end method
-} //end class
+	}
+}
