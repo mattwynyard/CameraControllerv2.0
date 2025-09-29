@@ -9,8 +9,5 @@
         <module name="onsite-camera-app" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="onsite-camera-app" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
 </project>

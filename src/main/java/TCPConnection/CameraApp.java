@@ -20,10 +20,7 @@ import Bluetooth.BluetoothManager;
  */
 public class CameraApp {
 
-    //private static int count = 0;
     private static String path;
-    //private static final int CYCLE = 100; //milliseconds
-
     private static File errorFile;
     private static SimpleDateFormat sdfDate;
 

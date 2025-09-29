@@ -58,8 +58,6 @@ public class BluetoothManager implements DiscoveryListener {
 				mAgent.startInquiry(DiscoveryAgent.LIAC, this);
 			} catch (BluetoothStateException e){
 				e.printStackTrace();
-//			} catch (IOException e) {
-//				e.printStackTrace();
 			}
 				enquiryLock.wait();
 			}
@@ -97,7 +95,6 @@ public class BluetoothManager implements DiscoveryListener {
 		}
 		if(connectionURL == null){
 			System.out.println("Device does not support Simple SPP Service.");
-
 		}
 	}
 
